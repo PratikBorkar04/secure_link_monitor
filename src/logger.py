@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 import os
 
-LOG_DIR = "secure_link_protector_logs"
+LOG_DIR = "secure_link_monitor_logs"
 
 CURRENT_TIME_STAMP = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 
