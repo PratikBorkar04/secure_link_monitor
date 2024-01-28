@@ -86,7 +86,7 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logging.info("Entered data ingestion method")
         try:
-            df = pd.read_csv("https://raw.githubusercontent.com/PratikBorkar04/linksafetyscanner/main/linksafety/datasets/urldata.csv")
+            df = pd.read_csv("src/datasets/urldata.csv")
             logging.info("Read the data")
 
             # Define new columns
