@@ -1,0 +1,184 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>Secure Website Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+        font-family: Calibri, sans-serif;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        background-image: url("{{ url_for('static', filename='background.jpg') }}");
+        background-size: cover;
+        background-attachment: fixed;
+        }
+        
+        .container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 30px;
+        background-color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Reduced shadow for a subtler effect */
+        border-radius: 5px; /* Smaller border-radius for a less pronounced effect */
+        border: 1px solid black; /* Subtle, light border */
+        transition: transform 0.2s ease, box-shadow 0.2s ease; /* Shorter transition duration */
+        }
+
+        .container:hover {
+        transform: translateY(-1px); /* Reduced hover effect */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12); /* Subtler hover shadow */
+        }
+
+        h1 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+        width: 80%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 2px solid #2c3e50;
+        border-radius: 6px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="submit"] {
+        padding: 12px 25px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        input[type="submit"]:hover {
+        background-color: #0056b3; /* Subtle hover effect */
+        transform: scale(1.05); /* Button scale effect */
+        }
+
+        .result {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 8px;
+        color: #333;
+        background-color: #f8f9fa;
+        border: 1px solid #bdc3c7;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 18px;
+        }
+
+        .result span {
+        display: block;
+        margin-bottom: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        }
+
+        .safe-url {
+            color: #27ae60;
+        }
+
+        .unsafe-url {
+            color: #e74c3c;
+        }
+
+        .example-url {
+        margin-top: 5px;
+        color: #95a5a6;
+        }
+
+        .info-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #ecf0f1;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        border: 2px solid yellow; /* Added yellow border */
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition effects */
+        }
+
+        .info-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18); /* Hover effect */
+        }
+
+        .info-container h2 {
+        color: #34495e;
+        margin-bottom: 10px;
+        }
+
+        .info-container ul {
+        list-style-type: none;
+        padding: 0;
+        }
+
+        .info-container li {
+        margin-bottom: 10px;
+        }
+
+        .info-container li span.label {
+        font-weight: bold;
+        color: #2c3e50;
+        }
+
+        .info-prompt {
+        margin-top: 20px;
+        color: #2c3e50;
+        font-size: 18px;
+        }
+        .intro-text {
+        color: #2c3e50;
+        font-size: 18px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding: 0 15px;
+        line-height: 1.6;
+        border-radius: 8px;
+        background-color: #e8f0fe; /* Light blue background */
+        display: inline-block; /* Makes the background only wrap the text */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+    </head>
+    <body>
+    <div class="container">
+        <h1>🛡️ Secure Website Monitor</h1> <!-- Added emoji -->
+        <p class="intro-text">🔒 Check the safety of any website! Simply enter its link below, and we'll analyze the URL for security risks, privacy issues, and more.</p>
+        <form action="{{ url_for('predict') }}" method="post">
+        <input type="text" name="urlinput" placeholder="Enter Website link here" required>
+        <p class="example-url">Example: https://www.example123.com/</p> 
+        <input type="submit" value="🔍 Check Safety"> <!-- Added emoji -->
+        </form>
+            {% if result1 %}
+            <div class="result">
+                <span style="font-weight: bold; ">{{ inputurl }}</span>
+                <span class="{{ 'safe-url' if safe_status == 'safe' else 'unsafe-url' }}" style="font-weight: bold;">{{ result1 }}</span>
+                <span style="font-weight: bold;">{{ result2 }}</span>
+                <span style="font-weight: bold;">{{ result3 }}</span>
+                <span style="font-weight: bold;">{{ result4 }}</span>
+                <span style="font-weight: bold;">{{ result5 }}</span>
+                <span style="font-weight: bold;">{{ result6 }}</span>
+            </div>
+            <p class="info-prompt">Scroll down for additional information.</p>
+        {% endif %}
+
+    </div>
+    {% if result1 %}
+        <div class="info-container">
+            <h2>💡 Additional Information</h2> <!-- Added emoji -->
+            <ul>
+            <li><span class="label">SSL Certificate:</span> Enhances security by encrypting data between the user and the website.</li>
+            <li><span class="label">Server Banner:</span> Indicates server's software version; important for security assessments.</li>
+            <li><span class="label">HSTS (HTTP Strict Transport Security):</span> Enforces secure HTTPS connections, protecting against certain attacks.</li>
+            <li><span class="label">X-XSS-Protection:</span> Helps prevent cross-site scripting (XSS) attacks for safer browsing.</li>
+            </ul>
+        </div>
+    {% endif %}
+    </body>
+    </html>
