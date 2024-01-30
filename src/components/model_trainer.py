@@ -2,12 +2,16 @@ import os
 import sys
 from dataclasses import dataclass
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix
 from src.utils import save_object, evaluate_models
 from src.logger import logging
 from src.exception import securelinkException
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+
 
 @dataclass
 class ModelTrainerConfig:
@@ -27,9 +31,12 @@ class ModelTrainer:
                 test_array[:, -1]
             )
             models = {
-            "Logistic Regression": LogisticRegression(max_iter=100),
-            "Random Forest": RandomForestClassifier(),
-            "Naive Bayes": GaussianNB(),
+                "Decision Tree": DecisionTreeClassifier(),
+                "Logistic Regression": LogisticRegression(),
+                "Random Forest": RandomForestClassifier(),
+                "SVM": SVC(),
+                "KNN": KNeighborsClassifier(),
+                "Naive Bayes": GaussianNB()
             }
             model_report_df = evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, models=models)
 
