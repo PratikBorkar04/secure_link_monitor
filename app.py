@@ -1,16 +1,23 @@
 from flask import Flask, request, render_template
 import pickle
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
+import numpy as np
+import requests
+import logging
 from urllib.parse import urlparse, parse_qs
 import ssl
 import socket
-import numpy as np
-import requests
-import pandas as pd
+import os
 
 app = Flask(__name__)
+
+# Load the model at the start of the application
+model_path = os.path.join(os.path.dirname(__file__), "artifacts", "model.pkl")
+with open(model_path, 'rb') as model_file:
+    model = pickle.load(model_file)
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
 def is_ssl_certified(url):
     try:
         domain = urlparse(url).netloc
@@ -19,52 +26,58 @@ def is_ssl_certified(url):
             s.connect((domain, 443))
             cert = s.getpeercert()
             return cert is not None
-    except:
+    except Exception as e:
+        logging.error(f"Error in SSL certification check: {e}")
         return False
+
 def check_server_banner(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if 'Server' in response.headers:
             return True, response.headers['Server']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error in server banner check: {e}")
         return False, str(e)
 
 def check_hsts(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if 'Strict-Transport-Security' in response.headers:
             return True, response.headers['Strict-Transport-Security']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error in HSTS check: {e}")
         return False, str(e)
-    
+
 def check_x_xss_protection(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if 'X-XSS-Protection' in response.headers:
             return True, response.headers['X-XSS-Protection']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
+        logging.error(f"Error in X-XSS-Protection check: {e}")
         return False, str(e)
+
 @app.route('/')
 def home():
     return render_template('home.html', prediction_text='')
+def home():
+    return render_template('home.html', prediction_text='')
 
-@app.route('/predict', methods=['GET', 'POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
-    if request.method == 'POST':
-        prediction_made = True
-
-        # Get the input values from the form
-
+    try:
         url = str(request.form['urlinput'])
         inputurl = f'Entered Website: {url}'
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
+        prediction_made = True
+
 
         # Counting occurrences of characters and vowels in the domain
         qty_hyphen_domain = domain.count('-')
@@ -128,10 +141,7 @@ def predict():
         ]
         input_data_as_numpy_array = np.asarray(result_list)
         input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
-
-        model = pickle.load(open("artifacts\model.pkl", "rb"))
         prediction = model.predict(input_data_reshaped)
-
 
         if str(prediction[0]) == '0':
             result1 = f'🟢 Status: {url} website is ✅SAFE to visit.'
@@ -172,10 +182,9 @@ def predict():
 
         return render_template('home.html',prediction_made=prediction_made,inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
 
-        
-        
-    else:
-        return "Method Not Allowed"
+    except Exception as e:
+        logging.error(f"Error during prediction: {e}")
+        return render_template('error.html', error_message=str(e))
 
 if __name__ == "__main__":
     app.run(debug=True)
