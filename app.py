@@ -8,6 +8,7 @@ import ssl
 import socket
 import numpy as np
 import requests
+import pandas as pd
 
 app = Flask(__name__)
 def is_ssl_certified(url):
@@ -56,7 +57,10 @@ def home():
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
+        prediction_made = True
+
         # Get the input values from the form
+
         url = str(request.form['urlinput'])
         inputurl = f'Entered Website: {url}'
         parsed_url = urlparse(url)
@@ -165,8 +169,10 @@ def predict():
             result6 = "✅X-XSS-Protection is set for the website."
         else:
             result6 = "❌X-XSS-Protection is not set for the website."
-        return render_template('home.html',inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
 
+        return render_template('home.html',prediction_made=prediction_made,inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
+
+        
         
     else:
         return "Method Not Allowed"

@@ -49,19 +49,18 @@
         padding: 12px 25px;
         background-color: #007bff;
         color: white;
-        border: none;
+        border: 2px solid black; /* Black border added */
         border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.3s ease, transform 0.2s ease;
-        }
+    }
 
         input[type="submit"]:hover {
         background-color: #0056b3; /* Subtle hover effect */
         transform: scale(1.05); /* Button scale effect */
-        }
+    }
 
         .result {
-        margin-top: 30px;
         padding: 20px;
         border-radius: 8px;
         color: #333;
@@ -113,18 +112,29 @@
         margin-bottom: 10px;
         }
 
-        .info-container ul {
-        list-style-type: none;
-        padding: 0;
+        .info-container ol {
+            counter-reset: step-counter;
         }
 
         .info-container li {
-        margin-bottom: 10px;
+            list-style-type: none;
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 10px;
         }
 
-        .info-container li span.label {
-        font-weight: bold;
-        color: #2c3e50;
+        .info-container li:before {
+            counter-increment: step-counter;
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            background-color: #2c3e50;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
         }
 
         .info-prompt {
@@ -144,19 +154,89 @@
         display: inline-block; /* Makes the background only wrap the text */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+    .prediction-result-heading {
+        font-size: 28px; /* Adjust the font size as needed */
+        color: #2c3e50; /* Choose a color that fits your design */
+        margin-bottom: 15px; /* Spacing below the heading */
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Optional text shadow for depth */
+        border-bottom: 2px solid #2c3e50; /* Optional border for emphasis */
+        padding-bottom: 10px; /* Padding to space out the border */
+        text-align: center; /* Center the heading */
+    }
+    .scroll-down-arrow {
+    position: fixed;
+    right: 180px; /* Adjust to move the arrow left or right */
+    bottom: 180px; /* Adjust to move the arrow up or down */
+    display: block;
+    font-size: 30px; /* Adjust size as needed */
+    text-decoration: none;
+    color: #007bff; /* Adjust color as needed */
+    background-color: #ffffff; /* Background color for visibility */
+    border-radius: 50%;
+    width: 50px; /* Adjust width as needed */
+    height: 50px; /* Adjust height as needed */
+    text-align: center;
+    line-height: 50px; /* Adjust to vertically center the arrow */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    .scroll-down-arrow:hover {
+    transform: translateY(5px);
+    background-color: #e0e0e0; /* Change color on hover */
+    }
+
+    html {
+    scroll-behavior: smooth;
+    }
+    .custom-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .custom-list li {
+        margin-bottom: 10px;
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .custom-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-size: 20px;
+        color: #2c3e50;
+    }
+   
     </style>
     </head>
     <body>
     <div class="container">
         <h1>🛡️ Secure Website Monitor</h1> <!-- Added emoji -->
         <p class="intro-text">🔒 Check the safety of any website! Simply enter its link below, and we'll analyze the URL for security risks, privacy issues, and more.</p>
-        <form action="{{ url_for('predict') }}" method="post">
-        <input type="text" name="urlinput" placeholder="Enter Website link here" required>
-        <p class="example-url">Example: https://www.example123.com/</p> 
-        <input type="submit" value="🔍 Check Safety"> <!-- Added emoji -->
+        <form action="{{ url_for('predict') }}" method="post" id="safetyCheckForm">
+            <input type="text" name="urlinput" placeholder="Enter Website link here" required>
+            <p class="example-url">Example: https://www.example123.com/</p> 
+            <input type="submit" value="🔍 Check Safety">
         </form>
+    </div>
+        {% if not prediction_made %}
+            <div id="howItWorks" class="info-container">
+                <h2>How This Works</h2>
+                <h4>Follow these simple steps to check the safety of a website:</h4>
+                <ol>
+                    <p>Enter the full URL of the website you want to check into the text box above.</p>
+                    <p>Click on the "🔍 Check Safety" button to start the analysis.</p>
+                    <p>Wait for a few moments while we process your request and analyze the URL.</p>
+                    <p>Review the safety report that appears with details about the website's security.</p>                </ol>
+            </div>
+        {% endif %}
+        <a href="#predictionResult" class="scroll-down-arrow" id="toggleArrow">⬇️</a>
+    </form>
             {% if result1 %}
+            <div class="container"id="predictionResult">
             <div class="result">
+                <h2 class="prediction-result-heading">Prediction Result</h2>
                 <span style="font-weight: bold; ">{{ inputurl }}</span>
                 <span class="{{ 'safe-url' if safe_status == 'safe' else 'unsafe-url' }}" style="font-weight: bold;">{{ result1 }}</span>
                 <span style="font-weight: bold;">{{ result2 }}</span>
@@ -170,15 +250,31 @@
 
     </div>
     {% if result1 %}
-        <div class="info-container">
-            <h2>💡 Additional Information</h2> <!-- Added emoji -->
-            <ul>
-            <li><span class="label">SSL Certificate:</span> Enhances security by encrypting data between the user and the website.</li>
-            <li><span class="label">Server Banner:</span> Indicates server's software version; important for security assessments.</li>
-            <li><span class="label">HSTS (HTTP Strict Transport Security):</span> Enforces secure HTTPS connections, protecting against certain attacks.</li>
-            <li><span class="label">X-XSS-Protection:</span> Helps prevent cross-site scripting (XSS) attacks for safer browsing.</li>
-            </ul>
-        </div>
+    <div class="info-container" id="additionalInfo">
+        <h2>💡 Additional Information</h2>
+        <ul class="custom-list">
+            <li><span class="custom-icon">&#128274;</span> <span class="label">SSL Certificate:</span> Enhances security by encrypting data between the user and the website.</li>
+            <li><span class="custom-icon">&#128187;</span> <span class="label">Server Banner:</span> Indicates server's software version; important for security assessments.</li>
+            <li><span class="custom-icon">&#128736;</span> <span class="label">HSTS (HTTP Strict Transport Security):</span> Enforces secure HTTPS connections, protecting against certain attacks.</li>
+            <li><span class="custom-icon">&#128679;</span> <span class="label">X-XSS-Protection:</span> Helps prevent cross-site scripting (XSS) attacks for safer browsing.</li>
+        </ul>
+    </div>
     {% endif %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var arrow = document.getElementById('toggleArrow');
+            var targets = [
+                document.getElementById('howItWorks'),
+                document.getElementById('predictionResult'),
+                document.getElementById('additionalInfo')
+            ];
+            var currentTargetIndex = 0;
+
+            arrow.addEventListener('click', function(event) {
+                currentTargetIndex = (currentTargetIndex + 1) % targets.length;
+                arrow.href = '#' + targets[currentTargetIndex].id;
+            });
+        });
+    </script>
     </body>
     </html>
