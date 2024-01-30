@@ -66,10 +66,8 @@ def check_x_xss_protection(url):
 @app.route('/')
 def home():
     return render_template('home.html', prediction_text='')
-def home():
-    return render_template('home.html', prediction_text='')
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
     try:
         url = str(request.form['urlinput'])
