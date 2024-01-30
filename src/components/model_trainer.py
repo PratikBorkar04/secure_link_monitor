@@ -2,7 +2,6 @@ import os
 import sys
 from dataclasses import dataclass
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import confusion_matrix
@@ -28,7 +27,6 @@ class ModelTrainer:
                 test_array[:, -1]
             )
             models = {
-            "Decision Tree": DecisionTreeClassifier(),
             "Logistic Regression": LogisticRegression(max_iter=100),
             "Random Forest": RandomForestClassifier(),
             "Naive Bayes": GaussianNB(),

@@ -69,7 +69,6 @@ def home():
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    try:
         url = str(request.form['urlinput'])
         inputurl = f'Entered Website: {url}'
         parsed_url = urlparse(url)
@@ -179,10 +178,6 @@ def predict():
             result6 = "❌X-XSS-Protection is not set for the website."
 
         return render_template('home.html',prediction_made=prediction_made,inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
-
-    except Exception as e:
-        logging.error(f"Error during prediction: {e}")
-        return render_template('error.html', error_message=str(e))
 
 if __name__ == "__main__":
     app.run(debug=True)
