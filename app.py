@@ -70,7 +70,7 @@ def home():
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
         url = str(request.form['urlinput'])
-        inputurl = f'Entered W  ebsite: {url}'
+        inputurl = f'Entered Website: {url}'
         parsed_url = urlparse(url)
         domain = parsed_url.netloc
         prediction_made = True
