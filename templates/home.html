@@ -214,7 +214,7 @@
     <div class="container">
         <h1>🛡️ Secure Website Monitor</h1> <!-- Added emoji -->
         <p class="intro-text">🔒 Check the safety of any website! Simply enter its link below, and we'll analyze the URL for security risks, privacy issues, and more.</p>
-        <form action="{{ url_for('predict') }}" method="post" id="safetyCheckForm">
+        <form action="{{ url_for('predict') }}" method="post" id="safetyCheckForm" onsubmit="scrollToResults()">
             <input type="text" name="urlinput" placeholder="Enter Website link here" required>
             <p class="example-url">Example: https://www.example123.com/</p> 
             <input type="submit" value="🔍 Check Safety">
@@ -261,6 +261,13 @@
     </div>
     {% endif %}
     <script>
+        function scrollToResults() {
+            var resultsSection = document.getElementById('predictionResult');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    
         document.addEventListener("DOMContentLoaded", function() {
             var arrow = document.getElementById('toggleArrow');
             var targets = [
@@ -269,11 +276,14 @@
                 document.getElementById('additionalInfo')
             ];
             var currentTargetIndex = 0;
-
+    
             arrow.addEventListener('click', function(event) {
                 currentTargetIndex = (currentTargetIndex + 1) % targets.length;
                 arrow.href = '#' + targets[currentTargetIndex].id;
             });
+            window.onload = function() {
+        document.getElementById('predictionResult').scrollIntoView({behavior: 'smooth'});
+         };
         });
     </script>
     </body>
