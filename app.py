@@ -63,7 +63,7 @@ def check_x_xss_protection(url):
         else:
             return False, None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error in X-XSS-Protection check for {url}: {e}")
+        logging.error(f"Error in X_XSS-Protection check for {url}: {e}")
         return False, None
 
 @app.route('/')
