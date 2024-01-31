@@ -19,6 +19,7 @@ with open(model_path, 'rb') as model_file:
 logging.basicConfig(level=logging.INFO)
 
 def is_ssl_certified(url):
+    # Function to check if the provided URL has a valid SSL certificate
     try:
         domain = urlparse(url).netloc
         ctx = ssl.create_default_context()
@@ -31,6 +32,7 @@ def is_ssl_certified(url):
         return False
 
 def check_server_banner(url):
+    # Function to check if the server banner is present in the response headers
     try:
         response = requests.get(url, timeout=5)
         if 'Server' in response.headers:
@@ -42,6 +44,7 @@ def check_server_banner(url):
         return False, str(e)
 
 def check_hsts(url):
+    # Function to check if HTTP Strict Transport Security (HSTS) is enabled
     try:
         response = requests.get(url, timeout=5)
         if 'Strict-Transport-Security' in response.headers:
@@ -53,6 +56,7 @@ def check_hsts(url):
         return False, str(e)
 
 def check_x_xss_protection(url):
+    # Function to check if X-XSS-Protection header is set in the response
     try:
         response = requests.get(url, timeout=5)
         if 'X-XSS-Protection' in response.headers:
@@ -65,10 +69,12 @@ def check_x_xss_protection(url):
 
 @app.route('/')
 def home():
+    # Route to render the home page
     return render_template('home.html', prediction_text='')
 
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
+        # Route to handle URL prediction requests
         url = str(request.form['urlinput'])
         inputurl = f'Entered Website: {url}'
         parsed_url = urlparse(url)
@@ -136,10 +142,14 @@ def predict():
             qty_and_url,
             qty_dot_params
         ]
+        # Creating a numpy array from the extracted features and reshaping for the model
         input_data_as_numpy_array = np.asarray(result_list)
         input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
+            
+        # Making the prediction using the loaded model
         prediction = model.predict(input_data_reshaped)
 
+        # Determining the prediction result and calculating the probability
         if str(prediction[0]) == '0':
             result1 = f'🟢 Status: {url} website is ✅SAFE to visit.'
             probability = model.predict_proba(input_data_reshaped)[0][1] * 100
@@ -177,6 +187,7 @@ def predict():
         else:
             result6 = "❌X-XSS-Protection is not set for the website."
 
+        # Render the prediction results back to the home page template
         return render_template('home.html',prediction_made=prediction_made,inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
 
 if __name__ == "__main__":
