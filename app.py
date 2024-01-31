@@ -19,53 +19,52 @@ with open(model_path, 'rb') as model_file:
 logging.basicConfig(level=logging.INFO)
 
 def is_ssl_certified(url):
-    # Function to check if the provided URL has a valid SSL certificate
     try:
-        domain = urlparse(url).netloc
-        ctx = ssl.create_default_context()
-        with ctx.wrap_socket(socket.socket(), server_hostname=domain) as s:
-            s.connect((domain, 443))
-            cert = s.getpeercert()
-            return cert is not None
-    except Exception as e:
-        logging.error(f"Error in SSL certification check: {e}")
+        response = requests.get(url)
+        return response.ok
+    except requests.exceptions.SSLError as e:
+        logging.error(f"SSL certificate error for URL {url}: {e}")
         return False
-
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Request error for URL {url}: {e}")
+        return False
 def check_server_banner(url):
-    # Function to check if the server banner is present in the response headers
     try:
         response = requests.get(url, timeout=5)
+        logging.info(f"Server banner check response for {url}: {response.status_code}, Headers: {response.headers}")
         if 'Server' in response.headers:
             return True, response.headers['Server']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error in server banner check: {e}")
-        return False, str(e)
+        logging.error(f"Error in server banner check for {url}: {e}")
+        return False, None
 
 def check_hsts(url):
     # Function to check if HTTP Strict Transport Security (HSTS) is enabled
     try:
         response = requests.get(url, timeout=5)
+        logging.info(f"HSTS check response for {url}: {response.status_code}, Headers: {response.headers}")
         if 'Strict-Transport-Security' in response.headers:
             return True, response.headers['Strict-Transport-Security']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error in HSTS check: {e}")
-        return False, str(e)
+        logging.error(f"Error in HSTS check for {url}: {e}")
+        return False, None
 
 def check_x_xss_protection(url):
-    # Function to check if X-XSS-Protection header is set in the response
+    # Function to check if X-XSS-Protection is set
     try:
         response = requests.get(url, timeout=5)
+        logging.info(f"X-XSS-Protection check response for {url}: {response.status_code}, Headers: {response.headers}")
         if 'X-XSS-Protection' in response.headers:
             return True, response.headers['X-XSS-Protection']
         else:
             return False, None
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error in X-XSS-Protection check: {e}")
-        return False, str(e)
+        logging.error(f"Error in X-XSS-Protection check for {url}: {e}")
+        return False, None
 
 @app.route('/')
 def home():
@@ -168,24 +167,30 @@ def predict():
         else:
             result3 = "❌ SSL Certificate: The website does not have a valid SSL certificate."
             
-        server_banner = check_server_banner(url)
+        server_banner,server_banner_error  = check_server_banner(url)
         if server_banner:
             result4 = "✅ Server banner is present for the website."
+        elif server_banner_error:
+            result4 = "❌ Error occurred in checking server banner."
         else:
             result4 = "❌ No server banner detected for the website."
 
         
-        hsts_enabled = check_hsts(url)
+        hsts_enabled, hsts_error = check_hsts(url)
         if hsts_enabled:
-            result5 = "✅HSTS is enabled for the website."
+            result5 = "✅ HSTS is enabled for the website."
+        elif hsts_error:
+            result5 = "❌ Error occurred in checking HSTS."
         else:
-            result5 = "❌HSTS is not enabled for the website."
+            result5 = "❌ HSTS is not enabled for the website."
 
-        x_xss_protection = check_x_xss_protection(url)
+        x_xss_protection, x_xss_error = check_x_xss_protection(url)
         if x_xss_protection:
-            result6 = "✅X-XSS-Protection is set for the website."
+            result6 = "✅ X-XSS-Protection is set for the website."
+        elif x_xss_error:
+            result6 = "❌ Error occurred in checking X-XSS-Protection."
         else:
-            result6 = "❌X-XSS-Protection is not set for the website."
+            result6 = "❌ X-XSS-Protection is not set for the website."
 
         # Render the prediction results back to the home page template
         return render_template('home.html',prediction_made=prediction_made,inputurl=inputurl, result1=result1, result2=result2, result3=result3,result4=result4,result5=result5,result6=result6,safe_status=safe_status)
