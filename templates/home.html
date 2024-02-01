@@ -237,8 +237,10 @@
             <div class="container"id="predictionResult">
             <div class="result">
                 <h2 class="prediction-result-heading">Prediction Result</h2>
-                <span style="font-weight: bold; ">{{ inputurl }}</span>
-                <span class="{{ 'safe-url' if safe_status == 'safe' else 'unsafe-url' }}" style="font-weight: bold;">{{ result1 }}</span>
+                <div style="word-wrap: break-word;"><span style="font-weight: bold;">{{ inputurl }}</span></div>
+                <div class="{{ 'safe-url' if safe_status == 'safe' else 'unsafe-url' }}" style="font-weight: bold; margin-top: 10px;">
+                    {{ result1 }}
+                </div>
                 <span style="font-weight: bold;">{{ result2 }}</span>
                 <span style="font-weight: bold;">{{ result3 }}</span>
                 <span style="font-weight: bold;">{{ result4 }}</span>
